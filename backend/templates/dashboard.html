@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CANNIBAL 34 — Evidence Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>CANNIBAL 34</h1>
+    <p>Secure Evidence & Incident Management Platform</p>
+    <span class="status">● SYSTEM ONLINE</span>
+</header>
+
+<div class="container">
+
+    <p id="message" class="muted">
+        Synchronizing with C34 Evidence API...
+    </p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Open Incidents</h3>
+            <div id="incidentCount" class="number">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Evidence Records</h3>
+            <div id="evidenceCount" class="number">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Integrity Verified</h3>
+            <div id="verifiedCount" class="number">0</div>
+        </div>
+
+        <div class="card">
+            <h3>Custody Transfers</h3>
+            <div id="transferCount" class="number">0</div>
+        </div>
+
+    </div>
+
+    <section>
+
+        <h2>Incidents</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Incident</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+
+            <tbody id="incidentTable">
+                <tr>
+                    <td colspan="4" class="muted">
+                        Loading incidents...
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <section>
+
+        <h2>Evidence Management</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Evidence</th>
+                    <th>Incident</th>
+                    <th>Description</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>SHA-256</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="evidenceTable">
+                <tr>
+<td colspan="7" class="muted">                        Loading evidence...
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </section>
+
+    <section>
+
+        <h2>Audit Trail</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Officer</th>
+                    <th>Details</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+
+            <tbody id="auditTable">
+                <tr>
+                    <td colspan="4" class="muted">
+                        Loading audit trail...
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='dashboard.js', v=4) }}"></script>
+
+</body>
+</html>

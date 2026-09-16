@@ -1,0 +1,25 @@
+# Secrets / authentication
+cookies.txt
+backend/cookies.txt
+*.env
+.env
+.env.*
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Evidence/test files that may contain sensitive data
+backend/test_evidence.txt
+data/test-evidence.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Termux / editor files
+*.swp
+*.swo
