@@ -41,6 +41,14 @@ def login_page():
 
 @app.route("/api/officer/register", methods=["POST"])
 def register_officer():
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
     data = request.get_json(silent=True) or {}
 
     full_name = data.get("full_name", "").strip()
