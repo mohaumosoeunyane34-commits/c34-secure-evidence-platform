@@ -1,25 +1,34 @@
-# Secrets / authentication
-cookies.txt
-backend/cookies.txt
-*.env
-.env
-.env.*
+# Gradle files
+.gradle/
+build/
 
-# Databases
-*.db
-*.sqlite
-*.sqlite3
+# Local configuration file (sdk path, etc)
+local.properties
 
-# Evidence/test files that may contain sensitive data
-backend/test_evidence.txt
-data/test-evidence.txt
+# Log/OS Files
+*.log
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
+# Android Studio generated files and folders
+captures/
+.externalNativeBuild/
+.cxx/
+*.aab
+*.apk
+output-metadata.json
 
-# Termux / editor files
-*.swp
-*.swo
+# IntelliJ
+*.iml
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Android Profiling
+*.hprof
