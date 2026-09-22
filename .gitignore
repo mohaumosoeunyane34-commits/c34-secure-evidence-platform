@@ -32,3 +32,23 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Secrets / session data
+cookies.txt
+**/cookies.txt
+.env
+*.key
+*.pem
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Test evidence / local test data
+backend/test_evidence.txt
+data/test-evidence.txt
