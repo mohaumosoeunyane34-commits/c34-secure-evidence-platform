@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from pathlib import Path
 import sqlite3
 import sys
-import secrets
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "backend"))
@@ -13,7 +13,7 @@ from database import init_database, get_connection
 app = Flask(__name__)
 
 # Development secret. Replace with a strong secret before deployment.
-app.secret_key = secrets.token_hex(32)
+app.secret_key = os.environ.get("C34_SECRET_KEY", "C34-DEVELOPMENT-SECRET-CHANGE-BEFORE-DEPLOYMENT")
 
 
 @app.route("/")
