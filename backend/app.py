@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, session, render_template
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from pathlib import Path
 import sqlite3
 import sys
 import os
+import uuid
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR / "backend"))
@@ -14,6 +16,8 @@ app = Flask(__name__)
 
 # Development secret. Replace with a strong secret before deployment.
 SECRET_FILE = BASE_DIR / ".c34_secret"
+EVIDENCE_DIR = BASE_DIR / "data" / "evidence_files"
+EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
 
 if os.environ.get("C34_SECRET_KEY"):
     app.secret_key = os.environ["C34_SECRET_KEY"]

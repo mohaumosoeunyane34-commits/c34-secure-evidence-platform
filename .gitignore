@@ -55,3 +55,6 @@ data/test-evidence.txt
 
 # C34 local development secret
 .c34_secret
+
+# Local evidence storage
+/data/evidence_files/
