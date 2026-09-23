@@ -50,13 +50,10 @@ def login_page():
 
 @app.route("/api/officer/register", methods=["POST"])
 def register_officer():
-    officer_id = require_officer()
+    officer_id, error = require_role("ADMIN")
 
-    if not officer_id:
-        return jsonify({
-            "success": False,
-            "message": "Authentication required."
-        }), 401
+    if error:
+        return error
 
     data = request.get_json(silent=True) or {}
 
@@ -219,6 +216,49 @@ def require_officer():
         return None
 
     return officer_id
+
+
+def require_role(*allowed_roles):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return None, (
+            jsonify({
+                "success": False,
+                "message": "Authentication required."
+            }),
+            401
+        )
+
+    conn = get_connection()
+
+    officer = conn.execute(
+        "SELECT id, role FROM officers WHERE id = ?",
+        (officer_id,)
+    ).fetchone()
+
+    conn.close()
+
+    if officer is None:
+        session.clear()
+        return None, (
+            jsonify({
+                "success": False,
+                "message": "Officer account not found."
+            }),
+            401
+        )
+
+    if officer["role"] not in allowed_roles:
+        return None, (
+            jsonify({
+                "success": False,
+                "message": "Insufficient permissions."
+            }),
+            403
+        )
+
+    return officer_id, None
 
 @app.route("/api/incidents", methods=["POST"])
 def create_incident():
