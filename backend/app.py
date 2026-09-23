@@ -13,7 +13,16 @@ from database import init_database, get_connection
 app = Flask(__name__)
 
 # Development secret. Replace with a strong secret before deployment.
-app.secret_key = os.environ.get("C34_SECRET_KEY", "C34-DEVELOPMENT-SECRET-CHANGE-BEFORE-DEPLOYMENT")
+SECRET_FILE = BASE_DIR / ".c34_secret"
+
+if os.environ.get("C34_SECRET_KEY"):
+    app.secret_key = os.environ["C34_SECRET_KEY"]
+elif SECRET_FILE.exists():
+    app.secret_key = SECRET_FILE.read_text().strip()
+else:
+    raise RuntimeError(
+        "C34_SECRET_KEY is not set and .c34_secret is missing."
+    )
 
 
 @app.route("/")
