@@ -119,3 +119,43 @@ Further production controls would include secure multipart file-upload handling,
 **Mohau Mosoeunyane**
 
 CANNIBAL 34 / C34 Secure Evidence Platform
+# CANNIBAL 34 Secure Evidence Platform
+
+A security-focused evidence management platform designed to help
+organizations record incidents, manage evidence, track custody transfers,
+and maintain audit records.
+
+## Features
+
+- Officer accounts
+- Incident management
+- Evidence registration
+- Evidence verification
+- Chain-of-custody transfers
+- Audit logging
+- Evidence status tracking
+- Local SQLite database
+- Flask web interface
+
+## Intended Use
+
+This project is intended for authorized security, investigative,
+training, and evidence-management environments.
+
+## Security
+
+Do not use real sensitive evidence, personal information, passwords,
+or production credentials in a test installation.
+
+## Status
+
+CANNIBAL 34 Development Release v1.0
+
+## License
+
+See LICENSE for licensing information.
+
+## Contact
+
+CANNIBAL 34
+

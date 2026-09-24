@@ -1,60 +1,12 @@
-# Gradle files
-.gradle/
-build/
-
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
-
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
-
-# Python
 __pycache__/
-*.py[cod]
-
-# Secrets / session data
-cookies.txt
-**/cookies.txt
+*.pyc
+*.pyo
+.venv/
+venv/
 .env
-*.key
-*.pem
-
-# Local databases
 *.db
 *.sqlite
 *.sqlite3
-
-# Test evidence / local test data
-backend/test_evidence.txt
-data/test-evidence.txt
-
-# C34 local development secret
-.c34_secret
-
-# Local evidence storage
-/data/evidence_files/
+instance/
+uploads/
+secrets/
