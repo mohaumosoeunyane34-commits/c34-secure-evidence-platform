@@ -13,3 +13,9 @@ secrets/
 
 .c34_secret
 *.tar.gz
+
+# Local/demo files
+c34cookies.txt
+c34headers.txt
+backend/*.backup
+demo/*.db
