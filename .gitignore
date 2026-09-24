@@ -10,3 +10,6 @@ venv/
 instance/
 uploads/
 secrets/
+
+.c34_secret
+*.tar.gz
