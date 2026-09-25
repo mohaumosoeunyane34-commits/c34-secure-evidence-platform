@@ -1008,7 +1008,7 @@ async function loadIncidents() {
         const incidents = data.incidents || [];
 
         const openCount =
-            document.getElementById("openIncidentCount");
+            document.getElementById("incidentCount");
 
         if (openCount) {
             openCount.textContent =
@@ -1070,7 +1070,7 @@ async function loadEvidence() {
         ).length;
 
         const verifiedCount =
-            document.getElementById("verifiedEvidenceCount");
+            document.getElementById("verifiedCount");
 
         if (verifiedCount) {
             verifiedCount.textContent = verified;
@@ -1619,7 +1619,7 @@ async function loadDashboard() {
     ]);
 
     const message =
-        document.getElementById("systemMessage");
+        document.getElementById("message");
 
     if (message) {
         message.textContent =
