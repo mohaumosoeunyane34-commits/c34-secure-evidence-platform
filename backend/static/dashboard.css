@@ -3,14 +3,14 @@
 }
 
 :root {
-    --bg: #070a0e;
-    --panel: #0d1218;
-    --panel-2: #111820;
-    --line: #202b36;
-    --text: #edf3f8;
-    --muted: #7f8d9a;
-    --accent: #35e58a;
-    --accent-dark: #173d2b;
+    --bg: #061426;
+    --panel: #0b2340;
+    --panel-2: #102f55;
+    --line: #28578c;
+    --text: #f2f7ff;
+    --muted: #a9bfdc;
+    --accent: #2f8cff;
+    --accent-dark: #0b3d91;
     --danger: #ff5263;
     --warning: #ffb84d;
     --blue: #4da6ff;
@@ -179,4 +179,184 @@ textarea:focus {
     table {
         min-width: 700px;
     }
+}
+
+/* =========================================
+   C34 MOUNTED POLICE BLUE OPERATIONS THEME
+   ========================================= */
+
+:root {
+    --c34-navy: #071a33;
+    --c34-blue: #0b3d91;
+    --c34-blue-light: #1769d1;
+    --c34-sky: #2f8cff;
+    --c34-panel: #0d2748;
+    --c34-panel-2: #102f55;
+    --c34-border: #28578c;
+    --c34-white: #f4f8ff;
+    --c34-muted: #a9bfdc;
+}
+
+body {
+    background:
+        linear-gradient(
+            135deg,
+            #061426 0%,
+            #0a2340 45%,
+            #0b3d91 100%
+        ) !important;
+
+    color: var(--c34-white) !important;
+}
+
+.topbar {
+    background: rgba(5, 20, 40, 0.96) !important;
+    border-bottom: 2px solid var(--c34-blue-light) !important;
+}
+
+.nav {
+    background: var(--c34-navy) !important;
+    border-bottom: 1px solid var(--c34-border) !important;
+}
+
+.nav a {
+    color: #dcecff !important;
+}
+
+.nav a:hover {
+    color: white !important;
+    background: var(--c34-blue) !important;
+}
+
+.system-status {
+    color: #b9dcff !important;
+}
+
+.live-indicator {
+    background: var(--c34-sky) !important;
+    box-shadow: 0 0 10px rgba(47, 140, 255, 0.7) !important;
+}
+
+.card,
+.intel-panel,
+.case-detail,
+.case-block {
+    background: rgba(8, 31, 58, 0.94) !important;
+    border: 1px solid var(--c34-border) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+.card:hover,
+.intel-panel:hover {
+    border-color: var(--c34-sky) !important;
+}
+
+.section-heading,
+.eyebrow {
+    color: #7fbdff !important;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--c34-white) !important;
+}
+
+table {
+    background: var(--c34-panel) !important;
+}
+
+thead {
+    background: #061a32 !important;
+}
+
+th {
+    color: #9dccff !important;
+    border-bottom: 1px solid var(--c34-border) !important;
+}
+
+td {
+    color: #e4efff !important;
+    border-bottom: 1px solid rgba(40, 87, 140, 0.45) !important;
+}
+
+.clickable-row:hover {
+    background: rgba(23, 105, 209, 0.22) !important;
+}
+
+.button,
+button {
+    background: var(--c34-blue) !important;
+    border: 1px solid var(--c34-sky) !important;
+    color: white !important;
+}
+
+.button:hover,
+button:hover {
+    background: var(--c34-blue-light) !important;
+}
+
+.button.primary {
+    background: var(--c34-blue-light) !important;
+}
+
+.classification {
+    background: rgba(23, 105, 209, 0.25) !important;
+    border: 1px solid #397fc4 !important;
+    color: #bdddff !important;
+}
+
+.intel-item,
+.finding,
+.timeline-item {
+    background: rgba(13, 39, 72, 0.8) !important;
+    border-left: 3px solid var(--c34-blue-light) !important;
+}
+
+.intel-item strong,
+.finding strong,
+.timeline-item strong {
+    color: #dcecff !important;
+}
+
+.case-header {
+    border-bottom: 1px solid var(--c34-border) !important;
+}
+
+.case-description,
+.muted,
+small {
+    color: var(--c34-muted) !important;
+}
+
+.pipeline {
+    background: #061a32 !important;
+    border: 1px solid var(--c34-border) !important;
+}
+
+.pipeline span {
+    color: #b9dcff !important;
+}
+
+.system-message {
+    background: rgba(11, 61, 145, 0.28) !important;
+    border: 1px solid var(--c34-blue-light) !important;
+    color: #d9ebff !important;
+}
+
+footer {
+    background: #061426 !important;
+    border-top: 1px solid var(--c34-border) !important;
+    color: var(--c34-muted) !important;
+}
+
+/* Mounted-police inspired command-console accent */
+.c34-command-accent {
+    border-left: 5px solid var(--c34-sky);
+    background: linear-gradient(
+        90deg,
+        rgba(11, 61, 145, 0.35),
+        rgba(7, 26, 51, 0.15)
+    );
 }

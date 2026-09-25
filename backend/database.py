@@ -77,6 +77,78 @@ def init_database():
     );
     """)
 
+
+    conn.executescript("""
+    CREATE TABLE IF NOT EXISTS osint_cases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_number TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        status TEXT NOT NULL DEFAULT 'OPEN',
+        classification TEXT NOT NULL DEFAULT 'INTERNAL',
+        created_by INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (created_by) REFERENCES officers(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS osint_targets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER NOT NULL,
+        target_type TEXT NOT NULL,
+        target_value TEXT NOT NULL,
+        label TEXT,
+        notes TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (case_id) REFERENCES osint_cases(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS osint_sources (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER NOT NULL,
+        source_type TEXT NOT NULL,
+        source_name TEXT,
+        source_url TEXT,
+        collected_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        collector_id INTEGER NOT NULL,
+        notes TEXT,
+        FOREIGN KEY (case_id) REFERENCES osint_cases(id),
+        FOREIGN KEY (collector_id) REFERENCES officers(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS osint_findings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER NOT NULL,
+        target_id INTEGER,
+        source_id INTEGER,
+        finding_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        observed_data TEXT NOT NULL,
+        analyst_assessment TEXT,
+        confidence TEXT NOT NULL DEFAULT 'UNASSESSED',
+        status TEXT NOT NULL DEFAULT 'UNREVIEWED',
+        created_by INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (case_id) REFERENCES osint_cases(id),
+        FOREIGN KEY (target_id) REFERENCES osint_targets(id),
+        FOREIGN KEY (source_id) REFERENCES osint_sources(id),
+        FOREIGN KEY (created_by) REFERENCES officers(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS osint_timeline (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER NOT NULL,
+        event_type TEXT NOT NULL,
+        event_title TEXT NOT NULL,
+        event_description TEXT,
+        event_time TEXT DEFAULT CURRENT_TIMESTAMP,
+        created_by INTEGER NOT NULL,
+        FOREIGN KEY (case_id) REFERENCES osint_cases(id),
+        FOREIGN KEY (created_by) REFERENCES officers(id)
+    );
+    """)
+
     conn.commit()
     conn.close()
 

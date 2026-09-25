@@ -3,141 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>CANNIBAL 34 — Evidence Dashboard</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <title>CANNIBAL 34 — Intelligence & Evidence Console</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 
 <body>
 
-<header>
-    <h1>CANNIBAL 34</h1>
-    <p>Secure Evidence & Incident Management Platform</p>
-    <span class="status">● SYSTEM ONLINE</span>
-</header>
-
-<div class="container">
-
-    <p id="message" class="muted">
-        Synchronizing with C34 Evidence API...
-    </p>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>Open Incidents</h3>
-            <div id="incidentCount" class="number">0</div>
-        </div>
-
-        <div class="card">
-            <h3>Evidence Records</h3>
-            <div id="evidenceCount" class="number">0</div>
-        </div>
-
-        <div class="card">
-            <h3>Integrity Verified</h3>
-            <div id="verifiedCount" class="number">0</div>
-        </div>
-
-        <div class="card">
-            <h3>Custody Transfers</h3>
-            <div id="transferCount" class="number">0</div>
-        </div>
-
+<header class="topbar">
+    <div>
+        <h1>CANNIBAL 34</h1>
+        <p>Intelligence & Secure Evidence Platform</p>
     </div>
 
-    <section>
+    <div class="system-status">
+        <span>●</span> SYSTEM ONLINE
+    </div>
+</header>
 
-        <h2>Incidents</h2>
+<nav class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#investigations">Investigations</a>
+    <a href="#incidents">Incidents</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#audit">Audit</a>
+    <a href="https://github.com/mohaumosoeunyane34-commits/c34-secure-evidence-platform"
+       target="_blank" rel="noopener">Repository</a>
+</nav>
 
-        <table>
+<main class="container">
 
-            <thead>
-                <tr>
-                    <th>Incident</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                </tr>
-            </thead>
+    <div id="message" class="system-message">
+        Synchronizing with C34 services...
+    </div>
 
-            <tbody id="incidentTable">
-                <tr>
-                    <td colspan="4" class="muted">
-                        Loading incidents...
-                    </td>
-                </tr>
-            </tbody>
+    <section id="overview">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">OPERATIONS CONSOLE</span>
+                <h2>Command Overview</h2>
+            </div>
+            <span class="live-indicator">LIVE</span>
+        </div>
 
-        </table>
+        <div class="cards">
+
+            <div class="card">
+                <span class="card-label">OSINT CASES</span>
+                <div id="osintCaseCount" class="number">0</div>
+                <small>Active investigations</small>
+            </div>
+
+            <div class="card">
+                <span class="card-label">OPEN INCIDENTS</span>
+                <div id="incidentCount" class="number">0</div>
+                <small>Incident records</small>
+            </div>
+
+            <div class="card">
+                <span class="card-label">EVIDENCE</span>
+                <div id="evidenceCount" class="number">0</div>
+                <small>Evidence records</small>
+            </div>
+
+            <div class="card">
+                <span class="card-label">INTEGRITY VERIFIED</span>
+                <div id="verifiedCount" class="number">0</div>
+                <small>Audit confirmations</small>
+            </div>
+
+            <div class="card">
+                <span class="card-label">CUSTODY TRANSFERS</span>
+                <div id="transferCount" class="number">0</div>
+                <small>Recorded transfers</small>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="investigations">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">INTELLIGENCE</span>
+                <h2>OSINT Investigations</h2>
+            </div>
+            <span class="classification">AUTHORIZED USE</span>
+        </div>
+
+        <div class="intelligence-grid">
+
+            <div class="intel-panel">
+                <h3>Investigation Registry</h3>
+                <p class="muted">
+                    Structured public-information investigations,
+                    source tracking and analyst findings.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Classification</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="osintCaseTable">
+                        <tr>
+                            <td colspan="5" class="muted">
+                                Loading investigations...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="intel-panel">
+                <h3>Investigation Pipeline</h3>
+
+                <div class="pipeline">
+                    <div>
+                        <strong>01</strong>
+                        <span>CASE</span>
+                    </div>
+                    <div>
+                        <strong>02</strong>
+                        <span>TARGET</span>
+                    </div>
+                    <div>
+                        <strong>03</strong>
+                        <span>SOURCE</span>
+                    </div>
+                    <div>
+                        <strong>04</strong>
+                        <span>FINDING</span>
+                    </div>
+                    <div>
+                        <strong>05</strong>
+                        <span>TIMELINE</span>
+                    </div>
+                    <div>
+                        <strong>06</strong>
+                        <span>EVIDENCE</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="case-detail" id="osintCaseDetail">
+            <h3>Selected Investigation</h3>
+            <p class="muted">
+                Select an investigation to inspect its intelligence
+                record.
+            </p>
+        </div>
 
     </section>
 
-    <section>
+    <section id="incidents">
 
-        <h2>Evidence Management</h2>
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">CASE MANAGEMENT</span>
+                <h2>Incidents</h2>
+            </div>
+        </div>
 
-        <table>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Incident</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
 
-            <thead>
-                <tr>
-                    <th>Evidence</th>
-                    <th>Incident</th>
-                    <th>Description</th>
-                    <th>File</th>
-                    <th>Status</th>
-                    <th>SHA-256</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody id="evidenceTable">
-                <tr>
-<td colspan="7" class="muted">                        Loading evidence...
-                    </td>
-                </tr>
-            </tbody>
-
-        </table>
-
-    </section>
-
-    <section>
-
-        <h2>Audit Trail</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Action</th>
-                    <th>Officer</th>
-                    <th>Details</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-
-            <tbody id="auditTable">
-                <tr>
-                    <td colspan="4" class="muted">
-                        Loading audit trail...
-                    </td>
-                </tr>
-            </tbody>
-
-        </table>
+                <tbody id="incidentTable">
+                    <tr>
+                        <td colspan="4" class="muted">
+                            Loading incidents...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
     </section>
 
-</div>
+    <section id="evidence">
 
-<script src="{{ url_for('static', filename='dashboard.js', v=4) }}"></script>
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">DIGITAL FORENSICS</span>
+                <h2>Evidence Management</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evidence</th>
+                        <th>Incident</th>
+                        <th>Description</th>
+                        <th>File</th>
+                        <th>Status</th>
+                        <th>SHA-256</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="evidenceTable">
+                    <tr>
+                        <td colspan="7" class="muted">
+                            Loading evidence...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <section id="audit">
+
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">ACCOUNTABILITY</span>
+                <h2>Audit Trail</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Officer</th>
+                        <th>Details</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+
+                <tbody id="auditTable">
+                    <tr>
+                        <td colspan="4" class="muted">
+                            Loading audit trail...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <footer>
+        <strong>CANNIBAL 34</strong>
+        <span>Secure Intelligence Infrastructure</span>
+        <span>Authorized investigations only</span>
+    </footer>
+
+</main>
+
+<script src="{{ url_for('static', filename='dashboard.js', v=5) }}"></script>
 
 </body>
 </html>
-<a class="button"
-   href="https://github.com/mohaumosoeunyane34-commits/c34-secure-evidence-platform"
-   target="_blank">
-    View Repository
-</a>

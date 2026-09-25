@@ -973,6 +973,648 @@ def get_audit_logs():
         "log_count": len(audit_history)
     })
 
+# ============================================================
+# C34 OSINT INVESTIGATION API
+# Authorized/public-information investigations only
+# ============================================================
+
+def osint_case_access(case_id, officer_id):
+    conn = get_connection()
+    case = conn.execute(
+        """
+        SELECT *
+        FROM osint_cases
+        WHERE id = ?
+        """,
+        (case_id,)
+    ).fetchone()
+    conn.close()
+
+    if case is None:
+        return None
+
+    return case
+
+
+@app.route("/api/osint/cases", methods=["POST"])
+def create_osint_case():
+    officer_id, error = require_officer(), None
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    data = request.get_json(silent=True) or {}
+
+    case_number = data.get("case_number", "").strip()
+    title = data.get("title", "").strip()
+    description = data.get("description", "").strip()
+    classification = data.get(
+        "classification",
+        "INTERNAL"
+    ).strip().upper()
+
+    if not case_number or not title:
+        return jsonify({
+            "success": False,
+            "message": "case_number and title are required."
+        }), 400
+
+    conn = get_connection()
+
+    try:
+        cursor = conn.execute(
+            """
+            INSERT INTO osint_cases
+            (case_number, title, description, classification, created_by)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                case_number,
+                title,
+                description,
+                classification,
+                officer_id
+            )
+        )
+
+        case_id = cursor.lastrowid
+
+        conn.execute(
+            """
+            INSERT INTO audit_logs
+            (officer_id, action, entity_type, entity_id, details)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                officer_id,
+                "OSINT_CASE_CREATED",
+                "OSINT_CASE",
+                case_id,
+                case_number
+            )
+        )
+
+        conn.commit()
+
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "Case number already exists."
+        }), 409
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "case_id": case_id,
+        "case_number": case_number,
+        "message": "OSINT case created."
+    }), 201
+
+
+@app.route("/api/osint/cases", methods=["GET"])
+def list_osint_cases():
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    conn = get_connection()
+
+    rows = conn.execute(
+        """
+        SELECT
+            c.id,
+            c.case_number,
+            c.title,
+            c.description,
+            c.status,
+            c.classification,
+            c.created_at,
+            c.updated_at,
+            o.full_name AS created_by_name
+        FROM osint_cases c
+        LEFT JOIN officers o
+            ON c.created_by = o.id
+        ORDER BY c.id DESC
+        """
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "cases": [dict(row) for row in rows]
+    })
+
+
+@app.route("/api/osint/cases/<int:case_id>", methods=["GET"])
+def get_osint_case(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    conn = get_connection()
+
+    case = conn.execute(
+        """
+        SELECT
+            c.*,
+            o.full_name AS created_by_name
+        FROM osint_cases c
+        LEFT JOIN officers o
+            ON c.created_by = o.id
+        WHERE c.id = ?
+        """,
+        (case_id,)
+    ).fetchone()
+
+    if case is None:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "OSINT case not found."
+        }), 404
+
+    targets = conn.execute(
+        """
+        SELECT *
+        FROM osint_targets
+        WHERE case_id = ?
+        ORDER BY id DESC
+        """,
+        (case_id,)
+    ).fetchall()
+
+    sources = conn.execute(
+        """
+        SELECT
+            s.*,
+            o.full_name AS collector_name
+        FROM osint_sources s
+        LEFT JOIN officers o
+            ON s.collector_id = o.id
+        WHERE s.case_id = ?
+        ORDER BY s.id DESC
+        """,
+        (case_id,)
+    ).fetchall()
+
+    findings = conn.execute(
+        """
+        SELECT
+            f.*,
+            o.full_name AS created_by_name
+        FROM osint_findings f
+        LEFT JOIN officers o
+            ON f.created_by = o.id
+        WHERE f.case_id = ?
+        ORDER BY f.id DESC
+        """,
+        (case_id,)
+    ).fetchall()
+
+    timeline = conn.execute(
+        """
+        SELECT *
+        FROM osint_timeline
+        WHERE case_id = ?
+        ORDER BY event_time DESC
+        """,
+        (case_id,)
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "case": dict(case),
+        "targets": [dict(row) for row in targets],
+        "sources": [dict(row) for row in sources],
+        "findings": [dict(row) for row in findings],
+        "timeline": [dict(row) for row in timeline]
+    })
+
+
+@app.route("/api/osint/cases/<int:case_id>/targets", methods=["POST"])
+def create_osint_target(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    if osint_case_access(case_id, officer_id) is None:
+        return jsonify({
+            "success": False,
+            "message": "OSINT case not found."
+        }), 404
+
+    data = request.get_json(silent=True) or {}
+
+    target_type = data.get("target_type", "").strip().upper()
+    target_value = data.get("target_value", "").strip()
+    label = data.get("label", "").strip()
+    notes = data.get("notes", "").strip()
+
+    allowed_types = {
+        "USERNAME",
+        "DOMAIN",
+        "EMAIL",
+        "IP",
+        "URL",
+        "ORGANIZATION",
+        "PERSON",
+        "PHONE",
+        "OTHER"
+    }
+
+    if not target_type or not target_value:
+        return jsonify({
+            "success": False,
+            "message": "target_type and target_value are required."
+        }), 400
+
+    if target_type not in allowed_types:
+        return jsonify({
+            "success": False,
+            "message": "Unsupported target type."
+        }), 400
+
+    conn = get_connection()
+
+    cursor = conn.execute(
+        """
+        INSERT INTO osint_targets
+        (case_id, target_type, target_value, label, notes)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            case_id,
+            target_type,
+            target_value,
+            label,
+            notes
+        )
+    )
+
+    target_id = cursor.lastrowid
+
+    conn.execute(
+        """
+        INSERT INTO audit_logs
+        (officer_id, action, entity_type, entity_id, details)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            officer_id,
+            "OSINT_TARGET_CREATED",
+            "OSINT_TARGET",
+            target_id,
+            target_value
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "target_id": target_id,
+        "message": "OSINT target created."
+    }), 201
+
+
+@app.route("/api/osint/cases/<int:case_id>/sources", methods=["POST"])
+def create_osint_source(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    if osint_case_access(case_id, officer_id) is None:
+        return jsonify({
+            "success": False,
+            "message": "OSINT case not found."
+        }), 404
+
+    data = request.get_json(silent=True) or {}
+
+    source_type = data.get("source_type", "").strip().upper()
+    source_name = data.get("source_name", "").strip()
+    source_url = data.get("source_url", "").strip()
+    notes = data.get("notes", "").strip()
+
+    if not source_type:
+        return jsonify({
+            "success": False,
+            "message": "source_type is required."
+        }), 400
+
+    conn = get_connection()
+
+    cursor = conn.execute(
+        """
+        INSERT INTO osint_sources
+        (case_id, source_type, source_name, source_url,
+         collector_id, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            case_id,
+            source_type,
+            source_name,
+            source_url,
+            officer_id,
+            notes
+        )
+    )
+
+    source_id = cursor.lastrowid
+
+    conn.execute(
+        """
+        INSERT INTO audit_logs
+        (officer_id, action, entity_type, entity_id, details)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            officer_id,
+            "OSINT_SOURCE_REGISTERED",
+            "OSINT_SOURCE",
+            source_id,
+            source_name or source_type
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "source_id": source_id,
+        "message": "OSINT source registered."
+    }), 201
+
+
+@app.route("/api/osint/cases/<int:case_id>/findings", methods=["POST"])
+def create_osint_finding(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    if osint_case_access(case_id, officer_id) is None:
+        return jsonify({
+            "success": False,
+            "message": "OSINT case not found."
+        }), 404
+
+    data = request.get_json(silent=True) or {}
+
+    finding_type = data.get("finding_type", "").strip().upper()
+    title = data.get("title", "").strip()
+    observed_data = data.get("observed_data", "").strip()
+    analyst_assessment = data.get(
+        "analyst_assessment",
+        ""
+    ).strip()
+
+    confidence = data.get(
+        "confidence",
+        "UNASSESSED"
+    ).strip().upper()
+
+    target_id = data.get("target_id")
+    source_id = data.get("source_id")
+
+    allowed_confidence = {
+        "UNASSESSED",
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+    }
+
+    if not finding_type or not title or not observed_data:
+        return jsonify({
+            "success": False,
+            "message": "finding_type, title and observed_data are required."
+        }), 400
+
+    if confidence not in allowed_confidence:
+        return jsonify({
+            "success": False,
+            "message": "Invalid confidence value."
+        }), 400
+
+    conn = get_connection()
+
+    cursor = conn.execute(
+        """
+        INSERT INTO osint_findings
+        (
+            case_id,
+            target_id,
+            source_id,
+            finding_type,
+            title,
+            observed_data,
+            analyst_assessment,
+            confidence,
+            created_by
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            case_id,
+            target_id,
+            source_id,
+            finding_type,
+            title,
+            observed_data,
+            analyst_assessment,
+            confidence,
+            officer_id
+        )
+    )
+
+    finding_id = cursor.lastrowid
+
+    conn.execute(
+        """
+        INSERT INTO audit_logs
+        (officer_id, action, entity_type, entity_id, details)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            officer_id,
+            "OSINT_FINDING_CREATED",
+            "OSINT_FINDING",
+            finding_id,
+            title
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "finding_id": finding_id,
+        "message": "OSINT finding recorded."
+    }), 201
+
+
+@app.route("/api/osint/cases/<int:case_id>/timeline", methods=["POST"])
+def create_osint_timeline_event(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    if osint_case_access(case_id, officer_id) is None:
+        return jsonify({
+            "success": False,
+            "message": "OSINT case not found."
+        }), 404
+
+    data = request.get_json(silent=True) or {}
+
+    event_type = data.get("event_type", "").strip().upper()
+    event_title = data.get("event_title", "").strip()
+    event_description = data.get(
+        "event_description",
+        ""
+    ).strip()
+
+    if not event_type or not event_title:
+        return jsonify({
+            "success": False,
+            "message": "event_type and event_title are required."
+        }), 400
+
+    conn = get_connection()
+
+    cursor = conn.execute(
+        """
+        INSERT INTO osint_timeline
+        (case_id, event_type, event_title,
+         event_description, created_by)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            case_id,
+            event_type,
+            event_title,
+            event_description,
+            officer_id
+        )
+    )
+
+    event_id = cursor.lastrowid
+
+    conn.execute(
+        """
+        INSERT INTO audit_logs
+        (officer_id, action, entity_type, entity_id, details)
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            officer_id,
+            "OSINT_TIMELINE_EVENT_CREATED",
+            "OSINT_TIMELINE",
+            event_id,
+            event_title
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "event_id": event_id,
+        "message": "Timeline event recorded."
+    }), 201
+
+# C34 CASE REPORT
+@app.route("/api/osint/cases/<int:case_id>/report", methods=["GET"])
+def osint_case_report(case_id):
+    officer_id = require_officer()
+
+    if not officer_id:
+        return jsonify({
+            "success": False,
+            "message": "Authentication required."
+        }), 401
+
+    conn = get_connection()
+
+    case = conn.execute(
+        "SELECT * FROM osint_cases WHERE id = ?",
+        (case_id,)
+    ).fetchone()
+
+    if not case:
+        conn.close()
+        return jsonify({"success": False, "error": "Case not found"}), 404
+
+    targets = conn.execute(
+        "SELECT * FROM osint_targets WHERE case_id = ? ORDER BY id",
+        (case_id,)
+    ).fetchall()
+
+    sources = conn.execute(
+        "SELECT * FROM osint_sources WHERE case_id = ? ORDER BY id",
+        (case_id,)
+    ).fetchall()
+
+    findings = conn.execute(
+        "SELECT * FROM osint_findings WHERE case_id = ? ORDER BY id",
+        (case_id,)
+    ).fetchall()
+
+    timeline = conn.execute(
+        "SELECT * FROM osint_timeline WHERE case_id = ? ORDER BY event_time, id",
+        (case_id,)
+    ).fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "report": {
+            "case": dict(case),
+            "targets": [dict(x) for x in targets],
+            "sources": [dict(x) for x in sources],
+            "findings": [dict(x) for x in findings],
+            "timeline": [dict(x) for x in timeline],
+            "generated_by": "C34 Secure Evidence Platform"
+        }
+    })
+
 if __name__ == "__main__":
     init_database()
 
