@@ -91,6 +91,68 @@
             <span class="classification">AUTHORIZED USE</span>
         </div>
 
+        <div class="intel-panel workspace-panel">
+            <div class="workspace-header">
+                <div>
+                    <span class="eyebrow">INVESTIGATION WORKSPACE</span>
+                    <h3>Create OSINT Investigation</h3>
+                    <p class="muted">
+                        Register an authorized public-information investigation
+                        directly from the C34 operations console.
+                    </p>
+                </div>
+                <span class="classification">AUTHORIZED USE</span>
+            </div>
+
+            <form id="createOSINTCaseForm" class="workspace-form">
+                <div class="form-grid">
+
+                    <label>
+                        <span>Case Number</span>
+                        <input
+                            id="osintCaseNumber"
+                            type="text"
+                            placeholder="C34-OSINT-00002"
+                            required>
+                    </label>
+
+                    <label>
+                        <span>Classification</span>
+                        <select id="osintClassification">
+                            <option value="INTERNAL">INTERNAL</option>
+                            <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+                            <option value="RESTRICTED">RESTRICTED</option>
+                        </select>
+                    </label>
+
+                    <label class="full-width">
+                        <span>Investigation Title</span>
+                        <input
+                            id="osintCaseTitle"
+                            type="text"
+                            placeholder="Authorized OSINT Investigation"
+                            required>
+                    </label>
+
+                    <label class="full-width">
+                        <span>Description</span>
+                        <textarea
+                            id="osintCaseDescription"
+                            rows="4"
+                            placeholder="Describe the authorized investigation purpose and scope."></textarea>
+                    </label>
+
+                </div>
+
+                <div class="workspace-actions">
+                    <button type="submit" class="button primary">
+                        CREATE INVESTIGATION
+                    </button>
+                    <span id="osintCreateStatus" class="muted"></span>
+                </div>
+            </form>
+        </div>
+
         <div class="intelligence-grid">
 
             <div class="intel-panel">

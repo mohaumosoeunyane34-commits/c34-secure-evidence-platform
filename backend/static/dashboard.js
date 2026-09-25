@@ -37,8 +37,115 @@ function escapeHTML(value) {
 
 
 /* =========================
+   OSINT WORKSPACE
+========================= */
+
+async function createOSINTCase(event) {
+    event.preventDefault();
+
+    const status = document.getElementById("osintCreateStatus");
+    const button = event.target.querySelector("button[type='submit']");
+
+    const caseNumber =
+        document.getElementById("osintCaseNumber").value.trim();
+
+    const title =
+        document.getElementById("osintCaseTitle").value.trim();
+
+    const description =
+        document.getElementById("osintCaseDescription").value.trim();
+
+    const classification =
+        document.getElementById("osintClassification").value;
+
+    if (!caseNumber || !title) {
+        if (status) {
+            status.textContent = "Case number and title are required.";
+        }
+        return;
+    }
+
+    try {
+        if (status) {
+            status.textContent = "Creating investigation...";
+        }
+
+        if (button) {
+            button.disabled = true;
+            button.textContent = "CREATING...";
+        }
+
+        const data = await apiFetch("/api/osint/cases", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                case_number: caseNumber,
+                title: title,
+                description: description,
+                classification: classification
+            })
+        });
+
+        if (!data) return;
+
+        if (!data.success) {
+            throw new Error(
+                data.message || "Unable to create investigation."
+            );
+        }
+
+        if (status) {
+            status.textContent =
+                `Investigation ${data.case_number} created successfully.`;
+        }
+
+        event.target.reset();
+
+        const classificationField =
+            document.getElementById("osintClassification");
+
+        if (classificationField) {
+            classificationField.value = "INTERNAL";
+        }
+
+        await loadOSINT();
+
+        if (data.case_id) {
+            await viewOSINTCase(Number(data.case_id));
+        }
+
+    } catch (error) {
+        console.error("C34 CREATE OSINT CASE ERROR:", error);
+
+        if (status) {
+            status.textContent =
+                error.message || "Unable to create investigation.";
+        }
+
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = "CREATE INVESTIGATION";
+        }
+    }
+}
+
+/* =========================
    OSINT
 ========================= */
+
+const createOSINTForm =
+    document.getElementById("createOSINTCaseForm");
+
+if (createOSINTForm) {
+    createOSINTForm.addEventListener(
+        "submit",
+        createOSINTCase
+    );
+}
+
 
 async function loadOSINT() {
     try {
