@@ -495,3 +495,50 @@ footer {
         rgba(7, 26, 51, 0.15)
     );
 }
+
+/* =========================
+   EVIDENCE WORKSPACE
+========================= */
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hash-cell {
+    max-width: 180px;
+    overflow-wrap: anywhere;
+    font-family: monospace;
+    font-size: 0.78rem;
+}
+
+.workspace-panel {
+    margin-bottom: 24px;
+}
+
+.workspace-panel input,
+.workspace-panel textarea,
+.workspace-panel select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.workspace-panel button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+@media (max-width: 760px) {
+    .button-group {
+        flex-direction: column;
+    }
+
+    .button-group .button {
+        width: 100%;
+    }
+
+    .hash-cell {
+        max-width: 120px;
+    }
+}

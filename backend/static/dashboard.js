@@ -1045,6 +1045,7 @@ async function loadIncidents() {
 }
 
 
+
 /* =========================
    EVIDENCE
 ========================= */
@@ -1054,46 +1055,42 @@ async function loadEvidence() {
         const data = await apiFetch("/api/evidence");
 
         if (!data || !data.success) {
-            throw new Error(
-                data?.message || "Evidence API failed."
-            );
+            throw new Error(data?.message || "Evidence API failed.");
         }
 
         const evidence = data.evidence || [];
 
-        const count =
-            document.getElementById("evidenceCount");
-
+        const count = document.getElementById("evidenceCount");
         if (count) {
             count.textContent = evidence.length;
         }
 
-        const verified =
-            evidence.filter(
-                e =>
-                    e.verification_status ===
-                    "INTEGRITY_VERIFIED"
-            ).length;
+        const verified = evidence.filter(
+            e => e.verification_status === "INTEGRITY_VERIFIED"
+        ).length;
 
         const verifiedCount =
-            document.getElementById(
-                "verifiedEvidenceCount"
-            );
+            document.getElementById("verifiedEvidenceCount");
 
         if (verifiedCount) {
             verifiedCount.textContent = verified;
         }
 
-        const table =
-            document.getElementById("evidenceTable");
-
+        const table = document.getElementById("evidenceTable");
         if (!table) return;
 
         table.innerHTML = evidence.length
             ? evidence.map(e => `
                 <tr>
                     <td>
-                        ${escapeHTML(e.evidence_number)}
+                        <strong>${escapeHTML(e.evidence_number || "")}</strong>
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            e.incident_number ||
+                            String(e.incident_id || "")
+                        )}
                     </td>
 
                     <td>
@@ -1101,23 +1098,49 @@ async function loadEvidence() {
                     </td>
 
                     <td>
-                        ${escapeHTML(
-                            e.verification_status || "UNVERIFIED"
-                        )}
+                        ${escapeHTML(e.file_name || "—")}
                     </td>
 
                     <td>
-                        <button
-                            class="button small"
-                            onclick="verifyEvidence(${Number(e.id)})">
-                            Verify
-                        </button>
+                        ${escapeHTML(
+                            e.verification_status ||
+                            e.status ||
+                            "UNVERIFIED"
+                        )}
+                    </td>
+
+                    <td class="hash-cell">
+                        ${escapeHTML(e.sha256_hash || "—")}
+                    </td>
+
+                    <td>
+                        <div class="button-group">
+
+                            <button
+                                class="button small"
+                                onclick="verifyEvidence(${Number(e.id)})">
+                                Verify
+                            </button>
+
+                            <button
+                                class="button small"
+                                onclick="viewCustody(${Number(e.id)})">
+                                Custody
+                            </button>
+
+                            <button
+                                class="button small"
+                                onclick="transferEvidence(${Number(e.id)})">
+                                Transfer
+                            </button>
+
+                        </div>
                     </td>
                 </tr>
             `).join("")
             : `
                 <tr>
-                    <td colspan="4" class="empty-state">
+                    <td colspan="7" class="empty-state">
                         No evidence records.
                     </td>
                 </tr>
@@ -1126,6 +1149,257 @@ async function loadEvidence() {
     } catch (error) {
         console.error("C34 EVIDENCE ERROR:", error);
     }
+}
+
+
+async function registerEvidence(event) {
+    event.preventDefault();
+
+    const status = document.getElementById("evidenceCreateStatus");
+    const button = event.target.querySelector("button[type='submit']");
+
+    const incidentId =
+        Number(document.getElementById("evidenceIncidentId").value);
+
+    const description =
+        document.getElementById("evidenceDescription").value.trim();
+
+    const filePath =
+        document.getElementById("evidenceFilePath").value.trim();
+
+    if (!incidentId || !description) {
+        if (status) {
+            status.textContent = "Incident ID and description are required.";
+        }
+        return;
+    }
+
+    if (status) {
+        status.textContent = "Registering evidence...";
+    }
+
+    if (button) {
+        button.disabled = true;
+    }
+
+    try {
+        const data = await apiFetch("/api/evidence", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                incident_id: incidentId,
+                description: description,
+                file_path: filePath
+            })
+        });
+
+        if (!data || !data.success) {
+            throw new Error(
+                data?.message || "Evidence registration failed."
+            );
+        }
+
+        if (status) {
+            status.textContent =
+                `${data.evidence.evidence_number} registered successfully.`;
+        }
+
+        event.target.reset();
+
+        await loadDashboard();
+
+    } catch (error) {
+        console.error("C34 REGISTER EVIDENCE ERROR:", error);
+
+        if (status) {
+            status.textContent = error.message;
+        }
+
+    } finally {
+        if (button) {
+            button.disabled = false;
+        }
+    }
+}
+
+
+async function verifyEvidence(evidenceId) {
+    const evidencePath = prompt(
+        "Enter the authorized local evidence file path to verify:"
+    );
+
+    if (!evidencePath) return;
+
+    try {
+        const data = await apiFetch(
+            `/api/evidence/${Number(evidenceId)}/verify`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    file_path: evidencePath.trim()
+                })
+            }
+        );
+
+        if (!data || !data.success) {
+            throw new Error(
+                data?.message || "Evidence verification failed."
+            );
+        }
+
+        const result = data.evidence;
+
+        if (result.integrity_verified) {
+            alert(
+                `${result.evidence_number}
+
+` +
+                "INTEGRITY VERIFIED
+
+" +
+                `SHA-256:
+${result.current_sha256}`
+            );
+        } else {
+            alert(
+                `${result.evidence_number}
+
+` +
+                "INTEGRITY COMPROMISED
+
+" +
+                `Stored:
+${result.stored_sha256}
+
+` +
+                `Current:
+${result.current_sha256}`
+            );
+        }
+
+        await loadDashboard();
+
+    } catch (error) {
+        console.error("C34 VERIFY EVIDENCE ERROR:", error);
+        alert(error.message);
+    }
+}
+
+
+async function transferEvidence(evidenceId) {
+    const recipientId = prompt(
+        "Enter receiving officer ID:"
+    );
+
+    if (!recipientId) return;
+
+    const reason = prompt(
+        "Enter reason for custody transfer:"
+    );
+
+    if (reason === null) return;
+
+    try {
+        const data = await apiFetch(
+            `/api/evidence/${Number(evidenceId)}/transfer`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    to_officer: Number(recipientId),
+                    reason: reason.trim()
+                })
+            }
+        );
+
+        if (!data || !data.success) {
+            throw new Error(
+                data?.message || "Evidence transfer failed."
+            );
+        }
+
+        alert(
+            `${data.transfer.evidence_number}
+
+` +
+            `Transferred to ${data.transfer.recipient_badge} — ` +
+            `${data.transfer.recipient_name}
+
+` +
+            `Reason: ${data.transfer.reason || "Not specified"}`
+        );
+
+        await loadDashboard();
+
+    } catch (error) {
+        console.error("C34 TRANSFER EVIDENCE ERROR:", error);
+        alert(error.message);
+    }
+}
+
+
+async function viewCustody(evidenceId) {
+    try {
+        const data = await apiFetch(
+            `/api/evidence/${Number(evidenceId)}/custody`
+        );
+
+        if (!data || !data.success) {
+            throw new Error(
+                data?.message || "Custody history failed."
+            );
+        }
+
+        const history = data.custody_history || [];
+
+        let message =
+            `${data.evidence.evidence_number}
+
+` +
+            `Transfer count: ${data.transfer_count}
+
+`;
+
+        if (!history.length) {
+            message += "No custody transfers recorded.";
+        } else {
+            message += history.map((item, index) => `
+Transfer #${index + 1}
+From: ${item.from_badge || "Initial custody"}
+${item.from_name || ""}
+To: ${item.to_badge}
+${item.to_name}
+Reason: ${item.reason || "Not specified"}
+Time: ${item.transferred_at}
+            `.trim()).join("
+
+");
+        }
+
+        alert(message);
+
+    } catch (error) {
+        console.error("C34 CUSTODY ERROR:", error);
+        alert(error.message);
+    }
+}
+
+
+const registerEvidenceForm =
+    document.getElementById("registerEvidenceForm");
+
+if (registerEvidenceForm) {
+    registerEvidenceForm.addEventListener(
+        "submit",
+        registerEvidence
+    );
 }
 
 

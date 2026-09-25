@@ -258,42 +258,102 @@
 
     </section>
 
-    <section id="evidence">
 
-        <div class="section-heading">
+<section id="evidence">
+
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow">DIGITAL FORENSICS</span>
+            <h2>Evidence Management</h2>
+            <p class="muted">
+                Register, verify and maintain the chain of custody for digital evidence.
+            </p>
+        </div>
+        <span class="classification">EVIDENCE CONTROL</span>
+    </div>
+
+    <div class="intel-panel workspace-panel">
+        <div class="workspace-header">
             <div>
-                <span class="eyebrow">DIGITAL FORENSICS</span>
-                <h2>Evidence Management</h2>
+                <span class="eyebrow">EVIDENCE REGISTRATION</span>
+                <h3>Register Evidence</h3>
+                <p class="muted">
+                    Attach an authorized local evidence file and record its SHA-256 integrity value.
+                </p>
             </div>
         </div>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Evidence</th>
-                        <th>Incident</th>
-                        <th>Description</th>
-                        <th>File</th>
-                        <th>Status</th>
-                        <th>SHA-256</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+        <form id="registerEvidenceForm" class="workspace-form">
+            <div class="form-grid">
 
-                <tbody id="evidenceTable">
-                    <tr>
-                        <td colspan="7" class="muted">
-                            Loading evidence...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                <label>
+                    <span>Incident ID</span>
+                    <input
+                        id="evidenceIncidentId"
+                        type="number"
+                        min="1"
+                        placeholder="1"
+                        required
+                    >
+                </label>
 
-    </section>
+                <label>
+                    <span>Evidence File Path</span>
+                    <input
+                        id="evidenceFilePath"
+                        type="text"
+                        placeholder="/data/data/com.termux/files/home/evidence.txt"
+                    >
+                </label>
 
-    <section id="audit">
+                <label class="full-width">
+                    <span>Description</span>
+                    <textarea
+                        id="evidenceDescription"
+                        rows="4"
+                        placeholder="Describe the evidence and its authorized collection purpose."
+                        required
+                    ></textarea>
+                </label>
+
+            </div>
+
+            <div class="workspace-actions">
+                <button type="submit" class="button primary">
+                    REGISTER EVIDENCE
+                </button>
+                <span id="evidenceCreateStatus" class="muted"></span>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Evidence</th>
+                    <th>Incident</th>
+                    <th>Description</th>
+                    <th>File</th>
+                    <th>Status</th>
+                    <th>SHA-256</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="evidenceTable">
+                <tr>
+                    <td colspan="7" class="muted">
+                        Loading evidence...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+<section id="audit">
 
         <div class="section-heading">
             <div>
